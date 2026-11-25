@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   RoadGuard AI — Editorial Civic-Tech Visual Identity
+   ========================================================================== */
+
+:root {
+  --background: #F4F1E8;
+  --foreground: #292D2A;
+  --muted: #63675D;
+  --forest: #233B32;
+  --terracotta: #A65F45;
+  --terracotta-dark: #864832;
+  --sage: #6B8F65;
+  --ivory: #FAF8F2;
+  --border: #DEDCCF;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-forest: var(--forest);
+  --color-terracotta: var(--terracotta);
+  --color-terracotta-dark: var(--terracotta-dark);
+  --color-sage: var(--sage);
+  --color-ivory: var(--ivory);
+  --color-border: var(--border);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* Background variants */
+.bg-ivory { background-color: #F4F1E8; }
+.bg-ivory-subtle { background-color: #FAF8F2; }
+.bg-card { background-color: #FAF8F2; }
+.bg-forest { background-color: #233B32; }
+.bg-terracotta-subtle { background-color: rgba(166, 95, 69, 0.1); }
+.bg-sage-subtle { background-color: rgba(107, 143, 101, 0.08); }
+
+/* Text colors */
+.text-forest { color: #233B32; }
+.text-terracotta { color: #A65F45; }
+.text-terracotta-dark { color: #864832; }
+.text-muted { color: #63675D; }
+.text-sage { color: #6B8F65; }
+
+/* Border colors */
+.border-forest { border-color: #233B32; }
+.border-terracotta { border-color: #A65F45; }
+.border-sage { border-color: #6B8F65; }
+.border-ivory { border-color: #F4F1E8; }
+.border-divider { border-color: #DEDCCF; }
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+/* Subtle patterns/accents */
+.subtle-grid {
+  background-image: 
+    linear-gradient(#DEDCCF 1px, transparent 1px),
+    linear-gradient(90deg, #DEDCCF 1px, transparent 1px);
+  background-size: 50px 50px;
+  background-position: 0 0;
+}
+
+/* Focus styles */
+.focus-visible:focus-visible {
+  outline: 2px solid var(--sage);
+  outline-offset: 2px;
+}
+
+/* Windows High Contrast / Forced Colors support */
+@media (forced-colors: active) {
+  :where(a, button, input, select, textarea):focus-visible {
+    outline-color: Highlight;
+    outline-style: solid;
+    outline-width: 2px;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-spin {
+    animation: none;
+  }
+  .animate-pulse {
+    animation: none;
+  }
+}
