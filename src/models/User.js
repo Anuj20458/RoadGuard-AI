@@ -1,5 +1,9 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+import {
+  INDIAN_PHONE_ERROR_MESSAGE,
+  isValidIndianPhone,
+} from "../lib/india-data.js";
 
 export const USER_ROLES = ["citizen", "admin", "worker"];
 
@@ -55,7 +59,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true,
       maxlength: [20, "Phone number cannot exceed 20 characters."],
-      match: [/^[+\d\s()-]{7,20}$/, "Please provide a valid phone number."],
+      validate: {
+        validator: (value) => !value || isValidIndianPhone(value),
+        message: INDIAN_PHONE_ERROR_MESSAGE,
+      },
     },
     createdAt: {
       type: Date,

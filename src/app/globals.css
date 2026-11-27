@@ -26,8 +26,14 @@
   --color-sage: var(--sage);
   --color-ivory: var(--ivory);
   --color-border: var(--border);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Preserve Devanagari and Gurmukhi vowel matras/ligatures when utility classes apply wide tracking. */
+html[lang="hi"] [class*="tracking-"],
+html[lang="pa"] [class*="tracking-"] {
+  letter-spacing: normal;
 }
 
 /* Background variants */

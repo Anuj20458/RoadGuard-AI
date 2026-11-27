@@ -1,4 +1,8 @@
 import { z } from "zod";
+import {
+  INDIAN_PHONE_ERROR_MESSAGE,
+  isValidIndianPhone,
+} from "@/lib/india-data";
 
 export const registerSchema = z.object({
   name: z
@@ -18,7 +22,10 @@ export const registerSchema = z.object({
   phone: z
     .string()
     .trim()
-    .regex(/^[+\d\s()-]{7,20}$/, "Please enter a valid phone number.")
+    .max(20, "Phone number cannot exceed 20 characters.")
+    .refine((value) => value === "" || isValidIndianPhone(value), {
+      message: INDIAN_PHONE_ERROR_MESSAGE,
+    })
     .optional()
     .or(z.literal("")),
 });
@@ -45,7 +52,10 @@ export function formatZodErrors(zodError) {
   const fieldErrors = {};
 
   for (const issue of zodError.issues) {
-    const key = issue.path?.[0] ? String(issue.path[0]) : "form";
+    const key =
+      issue.path && issue.path.length > 0
+        ? issue.path.map(String).join(".")
+        : "form";
     if (!fieldErrors[key]) {
       fieldErrors[key] = issue.message;
     }

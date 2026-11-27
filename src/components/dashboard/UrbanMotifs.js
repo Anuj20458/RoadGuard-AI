@@ -1,3 +1,7 @@
+"use client";
+
+import { useLanguage } from "@/components/LanguageProvider";
+
 /**
  * Custom RoadGuard AI brand wordmark with an understated road-corridor
  * and surveyor grid emblem.
@@ -5,6 +9,8 @@
  * @param {{ compact?: boolean }} props
  */
 export function RoadGuardWordmark({ compact = false }) {
+  const { t } = useLanguage();
+
   return (
     <div className="flex items-center gap-3">
       <svg
@@ -60,7 +66,7 @@ export function RoadGuardWordmark({ compact = false }) {
         </div>
         {!compact && (
           <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.18em] text-[#777B70]">
-            Civic Road Registry
+            {t("brandSubtitle")}
           </p>
         )}
       </div>

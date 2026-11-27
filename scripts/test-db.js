@@ -40,7 +40,7 @@ async function runDatabaseTest() {
       email: testEmail,
       passwordHash: testPassword,
       role: "citizen",
-      phone: "+1 555-0199",
+      phone: "+91 98765 43210",
     });
     createdUserId = createdUser._id;
     assert.ok(createdUserId, "Created user must have an _id.");

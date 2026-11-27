@@ -3,7 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ShieldAlert, LogOut } from "lucide-react";
+import { ArrowUpRight, LogOut, ShieldAlert } from "lucide-react";
+import { useLanguage } from "@/components/LanguageProvider";
+import { getRoleHomePath } from "@/lib/formatters";
 import { RoadGuardWordmark } from "./UrbanMotifs";
 
 /**
@@ -13,6 +15,7 @@ import { RoadGuardWordmark } from "./UrbanMotifs";
  */
 export default function NonCitizenAccessView({ role }) {
   const router = useRouter();
+  const { t } = useLanguage();
   const [signingOut, setSigningOut] = useState(false);
 
   async function handleLogout() {
@@ -39,37 +42,52 @@ export default function NonCitizenAccessView({ role }) {
           </div>
           <div>
             <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#777B70]">
-              Access Notice · 403
+              {t("accessNotice403")}
             </p>
             <h1 className="text-lg font-semibold tracking-tight text-[#292D2A]">
-              Citizen Portal Restricted
+              {t("citizenPortalRestricted")}
             </h1>
           </div>
         </div>
 
         <p className="mt-5 text-sm leading-6 text-[#777B70]">
-          You are signed in under the{" "}
+          {t("signedInAsRole")}:{" "}
           <span className="font-mono text-xs font-semibold uppercase tracking-wider text-[#233B32]">
-            {role}
-          </span>{" "}
-          role. This civic workspace is reserved strictly for citizen accounts.
+            {role === "admin"
+              ? t("roleAdmin")
+              : role === "worker"
+                ? t("roleWorker")
+                : t("roleCitizen")}
+          </span>
+          . {t("nonCitizenNoticeText")}
         </p>
 
         <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+          {(role === "admin" || role === "worker") && (
+            <Link
+              href={getRoleHomePath(role)}
+              className="flex h-10 flex-1 items-center justify-center gap-1.5 bg-[#233B32] px-4 text-sm font-medium text-[#F4F1E8] transition-colors hover:bg-[#1B2E27]"
+            >
+              <span>
+                {role === "admin" ? t("adminConsole") : t("workerPortal")}
+              </span>
+              <ArrowUpRight className="h-3.5 w-3.5 text-[#DEDCCF]" />
+            </Link>
+          )}
           <Link
             href="/"
             className="flex h-10 flex-1 items-center justify-center border border-[#DEDCCF] bg-[#F4F1E8] px-4 text-sm font-medium text-[#292D2A] transition-colors hover:border-[#233B32]"
           >
-            Return Home
+            {t("home")}
           </Link>
           <button
             type="button"
             onClick={handleLogout}
             disabled={signingOut}
-            className="flex h-10 flex-1 items-center justify-center gap-2 bg-[#233B32] px-4 text-sm font-medium text-[#F4F1E8] transition-colors hover:bg-[#1B2E27] disabled:opacity-50"
+            className="flex h-10 flex-1 items-center justify-center gap-2 border border-[#DEDCCF] bg-[#FAF8F2] px-4 text-sm font-medium text-[#292D2A] transition-colors hover:border-[#A65F45] hover:text-[#864832] disabled:opacity-50"
           >
             <LogOut className="h-4 w-4" strokeWidth={1.6} />
-            {signingOut ? "Signing out..." : "Sign out"}
+            {signingOut ? t("signingOut") : t("signOut")}
           </button>
         </div>
       </div>

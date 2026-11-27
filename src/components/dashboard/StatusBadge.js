@@ -1,3 +1,7 @@
+"use client";
+
+import { useLanguage } from "@/components/LanguageProvider";
+
 const STATUS_STYLES = {
   pending: {
     label: "Pending",
@@ -56,18 +60,22 @@ const PRIORITY_STYLES = {
  * @param {{ status: string }} props
  */
 export function StatusBadge({ status }) {
+  const { t } = useLanguage();
   const config = STATUS_STYLES[status] || {
     label: status || "Unknown",
     dot: "bg-[#777B70]",
     classes: "border-[#DEDCCF] bg-[#F4F1E8] text-[#292D2A]",
   };
+  const translatedLabel = STATUS_STYLES[status]
+    ? t(`status_${status}`)
+    : config.label;
 
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-xs border px-2.5 py-0.5 font-mono text-[11px] font-medium uppercase tracking-wider ${config.classes}`}
     >
       <span className={`h-1.5 w-1.5 rounded-full ${config.dot}`} aria-hidden="true" />
-      {config.label}
+      {translatedLabel}
     </span>
   );
 }
@@ -78,16 +86,20 @@ export function StatusBadge({ status }) {
  * @param {{ priority: string }} props
  */
 export function PriorityBadge({ priority }) {
+  const { t } = useLanguage();
   const config = PRIORITY_STYLES[priority] || {
     label: priority || "Normal",
     classes: "text-[#777B70] border-[#DEDCCF]",
   };
+  const translatedLabel = PRIORITY_STYLES[priority]
+    ? t(`priority_${priority}`)
+    : config.label;
 
   return (
     <span
       className={`inline-flex items-center rounded-xs border px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-widest ${config.classes}`}
     >
-      {config.label}
+      {translatedLabel}
     </span>
   );
 }

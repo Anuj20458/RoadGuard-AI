@@ -1,6 +1,7 @@
 import { connection, NextResponse } from "next/server";
 import mongoose from "mongoose";
 import { requireApiAuth } from "@/lib/auth";
+import { serializeLocation } from "@/lib/operations-data";
 import Complaint from "@/models/Complaint";
 
 /**
@@ -28,7 +29,7 @@ export async function GET() {
         .sort({ createdAt: -1 })
         .limit(5)
         .select(
-          "title description imageUrl location priority status createdAt updatedAt"
+          "title description imageUrl location priority reportCategory roadType authorityCategory status createdAt updatedAt"
         )
         .lean(),
     ]);
@@ -50,12 +51,11 @@ export async function GET() {
       title: doc.title,
       description: doc.description,
       imageUrl: doc.imageUrl,
-      location: {
-        latitude: doc.location?.latitude ?? null,
-        longitude: doc.location?.longitude ?? null,
-        address: doc.location?.address || "",
-      },
+      location: serializeLocation(doc.location),
       priority: doc.priority,
+      reportCategory: doc.reportCategory || "pothole",
+      roadType: doc.roadType || "",
+      authorityCategory: doc.authorityCategory || "",
       status: doc.status,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,

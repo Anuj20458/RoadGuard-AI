@@ -2,6 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import LanguageSelector from "@/components/LanguageSelector";
+import { useLanguage } from "@/components/LanguageProvider";
+import { getRoleHomePath } from "@/lib/formatters";
 import {
   AlertTriangle,
   ArrowRight,
@@ -46,6 +50,8 @@ function getInputClasses(hasError, extraPadding = "") {
  * @param {{ mode: "login" | "register" }} props
  */
 export default function AuthCard({ mode }) {
+  const router = useRouter();
+  const { t } = useLanguage();
   const isRegister = mode === "register";
   const [form, setForm] = useState(INITIAL_FORM);
   const [fieldErrors, setFieldErrors] = useState({});
@@ -125,14 +131,16 @@ export default function AuthCard({ mode }) {
         if (data?.details) {
           setFieldErrors(data.details);
         }
-        setServerError(data?.error || "Authentication failed.");
+        setServerError(data?.error || t("authFailed"));
         return;
       }
 
       setCurrentUser(data.user);
       setForm(INITIAL_FORM);
+      router.push(getRoleHomePath(data.user?.role));
+      router.refresh();
     } catch {
-      setServerError("Network error. Please try again.");
+      setServerError(t("networkErrorRetry"));
     } finally {
       setSubmitting(false);
     }
@@ -147,10 +155,10 @@ export default function AuthCard({ mode }) {
       if (res.ok) {
         setCurrentUser(null);
       } else {
-        setServerError("Unable to sign out right now.");
+        setServerError(t("signOutError"));
       }
     } catch {
-      setServerError("Network error while signing out.");
+      setServerError(t("signOutNetworkError"));
     } finally {
       setSubmitting(false);
     }
@@ -164,7 +172,13 @@ export default function AuthCard({ mode }) {
           <div className="flex items-center justify-between gap-3 border-b border-[#DEDCCF] bg-[#F4F1E8] px-6 py-4 sm:px-8 lg:hidden">
             {currentUser ? (
               <Link
-                href="/dashboard"
+                href={
+                  currentUser.role === "admin"
+                    ? "/admin"
+                    : currentUser.role === "worker"
+                      ? "/worker"
+                      : "/dashboard"
+                }
                 className="focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6B8F65]"
               >
                 <RoadGuardWordmark compact />
@@ -172,9 +186,12 @@ export default function AuthCard({ mode }) {
             ) : (
               <RoadGuardWordmark compact />
             )}
-            <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-[#63675D]">
-              Civic Portal
-            </span>
+            <div className="flex items-center gap-2.5">
+              <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-[#63675D]">
+                {t("civicPortal")}
+              </span>
+              <LanguageSelector />
+            </div>
           </div>
 
           {/* Desktop Editorial Civic Context Panel */}
@@ -186,7 +203,13 @@ export default function AuthCard({ mode }) {
             <div className="relative z-10">
               {currentUser ? (
                 <Link
-                  href="/dashboard"
+                  href={
+                    currentUser.role === "admin"
+                      ? "/admin"
+                      : currentUser.role === "worker"
+                        ? "/worker"
+                        : "/dashboard"
+                  }
                   className="inline-block focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6B8F65]"
                 >
                   <RoadGuardWordmark />
@@ -199,47 +222,47 @@ export default function AuthCard({ mode }) {
 
               <div className="mt-10">
                 <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#A65F45]">
-                  Civic Infrastructure Portal
+                  {t("civicPortal")} · {t("indiaName")}
                 </p>
                 <p className="mt-3 text-2xl font-light tracking-tight text-[#292D2A]">
                   {isRegister
-                    ? "Join the municipal road registry."
-                    : "Return to your civic ledger."}
+                    ? t("authTaglineRegister")
+                    : t("authTaglineLogin")}
                 </p>
                 <p className="mt-3 text-sm leading-6 text-[#63675D]">
                   {isRegister
-                    ? "Create a verified citizen account to report road surface hazards and follow municipal repair progress."
-                    : "Sign in to review active pothole complaints, check field triage updates, and submit new reports."}
+                    ? t("authDescRegister")
+                    : t("authDescLogin")}
                 </p>
               </div>
             </div>
 
             <div className="relative z-10 mt-10 space-y-4">
               <RoadLineDivider
-                label={isRegister ? "Citizen Onboarding" : "Verified Access"}
+                label={isRegister ? t("citizenOnboarding") : t("verifiedAccess")}
               />
               <ul className="space-y-2.5 text-xs text-[#292D2A]">
                 <li className="flex items-center justify-between border-b border-[#DEDCCF] pb-2">
-                  <span>1. Authenticated Session</span>
+                  <span>{t("authStep1Title")}</span>
                   <span className="font-mono text-[11px] text-[#63675D]">
-                    Encrypted
+                    {t("authStep1Value")}
                   </span>
                 </li>
                 <li className="flex items-center justify-between border-b border-[#DEDCCF] pb-2">
-                  <span>2. Municipal Triage</span>
+                  <span>{t("authStep2Title")}</span>
                   <span className="font-mono text-[11px] text-[#63675D]">
-                    Live Ledger
+                    {t("authStep2Value")}
                   </span>
                 </li>
                 <li className="flex items-center justify-between">
-                  <span>3. Repair Verification</span>
+                  <span>{t("authStep3Title")}</span>
                   <span className="font-mono text-[11px] text-[#63675D]">
-                    Citizen Portal
+                    {t("authStep3Value")}
                   </span>
                 </li>
               </ul>
               <p className="pt-1 font-mono text-[10px] uppercase tracking-[0.16em] text-[#63675D]">
-                RoadGuard · Public Works Channel
+                RoadGuard · {t("brandSubtitle")}
               </p>
             </div>
           </aside>
@@ -247,41 +270,42 @@ export default function AuthCard({ mode }) {
           {/* Main Form / Session Workspace */}
           <main className="min-w-0 bg-[#FAF8F2] p-6 sm:p-8 lg:col-span-7 lg:p-10">
             <div className="border-b border-[#DEDCCF] pb-6">
-              <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5">
+              <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
                 <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#A65F45]">
-                  {isRegister ? "02 / Citizen Registration" : "01 / Citizen Access"}
+                  {isRegister ? t("authHeaderRegister") : t("authHeaderLogin")}
                 </span>
-                {currentUser && (
-                  <Link
-                    href="/dashboard"
-                    className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#63675D] transition-colors hover:text-[#233B32] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6B8F65]"
-                  >
-                    Dashboard
-                  </Link>
-                )}
+                <div className="flex items-center gap-3">
+                  {currentUser && (
+                    <Link
+                      href={
+                        currentUser.role === "admin"
+                          ? "/admin"
+                          : currentUser.role === "worker"
+                            ? "/worker"
+                            : "/dashboard"
+                      }
+                      className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#63675D] transition-colors hover:text-[#233B32] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6B8F65]"
+                    >
+                      {currentUser.role === "admin"
+                        ? t("adminConsole")
+                        : currentUser.role === "worker"
+                          ? t("workerPortal")
+                          : t("navDashboard")}
+                    </Link>
+                  )}
+                  <div className="hidden lg:block">
+                    <LanguageSelector />
+                  </div>
+                </div>
               </div>
 
               <h1 className="mt-3 text-2xl font-light tracking-tight text-[#292D2A] sm:text-3xl">
-                {isRegister ? (
-                  <>
-                    Create{" "}
-                    <span className="font-semibold text-[#233B32]">
-                      citizen account
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    Sign in to{" "}
-                    <span className="font-semibold text-[#233B32]">
-                      your account
-                    </span>
-                  </>
-                )}
+                {isRegister ? t("createCitizenAccount") : t("signInTitle")}
               </h1>
               <p className="mt-1.5 text-sm text-[#63675D]">
                 {isRegister
-                  ? "Report road potholes and track municipal repairs."
-                  : "Access your RoadGuard AI profile and complaint updates."}
+                  ? t("authDescRegister")
+                  : t("authDescLogin")}
               </p>
             </div>
 
@@ -297,7 +321,7 @@ export default function AuthCard({ mode }) {
                     className="mx-auto h-5 w-5 animate-spin rounded-full border-2 border-[#233B32] border-t-transparent"
                   />
                   <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.18em] text-[#63675D]">
-                    Checking session...
+                    {t("checkingSession")}
                   </p>
                 </div>
               ) : currentUser ? (
@@ -311,7 +335,7 @@ export default function AuthCard({ mode }) {
                           strokeWidth={1.8}
                         />
                         <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#63675D]">
-                          Signed in
+                          {t("signedIn")}
                         </p>
                       </div>
                       <h2 className="mt-2 truncate text-lg font-semibold tracking-tight text-[#292D2A]">
@@ -323,7 +347,12 @@ export default function AuthCard({ mode }) {
                     </div>
 
                     <span className="shrink-0 rounded-xs border border-[#233B32]/30 bg-[#FAF8F2] px-2.5 py-1 font-mono text-[10px] font-medium uppercase tracking-widest text-[#233B32]">
-                      Role: {currentUser.role}
+                      {t("rolePrefix")}:{" "}
+                      {currentUser.role === "admin"
+                        ? t("roleAdmin")
+                        : currentUser.role === "worker"
+                          ? t("roleWorker")
+                          : t("roleCitizen")}
                     </span>
                   </div>
 
@@ -342,19 +371,29 @@ export default function AuthCard({ mode }) {
                   )}
 
                   <div className="flex flex-col gap-3 pt-1 sm:flex-row">
-                    {currentUser.role === "citizen" && (
-                      <Link
-                        href="/dashboard"
-                        className="inline-flex h-11 flex-1 items-center justify-center gap-2 whitespace-nowrap bg-[#233B32] px-4 text-sm font-medium text-[#F4F1E8] transition-colors hover:bg-[#1B2E27] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6B8F65]"
-                      >
-                        <span>Dashboard</span>
-                        <ArrowUpRight
-                          aria-hidden="true"
-                          className="h-4 w-4 text-[#DEDCCF]"
-                          strokeWidth={1.7}
-                        />
-                      </Link>
-                    )}
+                    <Link
+                      href={
+                        currentUser.role === "admin"
+                          ? "/admin"
+                          : currentUser.role === "worker"
+                            ? "/worker"
+                            : "/dashboard"
+                      }
+                      className="inline-flex h-11 flex-1 items-center justify-center gap-2 whitespace-nowrap bg-[#233B32] px-4 text-sm font-medium text-[#F4F1E8] transition-colors hover:bg-[#1B2E27] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6B8F65]"
+                    >
+                      <span>
+                        {currentUser.role === "admin"
+                          ? t("adminConsole")
+                          : currentUser.role === "worker"
+                            ? t("workerPortal")
+                            : t("navDashboard")}
+                      </span>
+                      <ArrowUpRight
+                        aria-hidden="true"
+                        className="h-4 w-4 text-[#DEDCCF]"
+                        strokeWidth={1.7}
+                      />
+                    </Link>
                     <button
                       type="button"
                       onClick={handleLogout}
@@ -362,10 +401,10 @@ export default function AuthCard({ mode }) {
                       className="inline-flex h-11 flex-1 items-center justify-center gap-2 whitespace-nowrap border border-[#DEDCCF] bg-[#FAF8F2] px-4 text-sm font-medium text-[#292D2A] transition-colors hover:border-[#A65F45] hover:text-[#864832] disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6B8F65]"
                     >
                       <LogOut aria-hidden="true" className="h-4 w-4" strokeWidth={1.6} />
-                      <span>{submitting ? "Signing out..." : "Sign out"}</span>
+                      <span>{submitting ? t("signingOut") : t("signOut")}</span>
                     </button>
                     <Link href="/" className={SECONDARY_LINK_CLASSES}>
-                      Home
+                      {t("home")}
                     </Link>
                   </div>
                 </div>
@@ -388,7 +427,7 @@ export default function AuthCard({ mode }) {
                   {isRegister && (
                     <div>
                       <label htmlFor="name" className={LABEL_CLASSES}>
-                        Full name
+                        {t("fullName")}
                       </label>
                       <input
                         id="name"
@@ -402,7 +441,7 @@ export default function AuthCard({ mode }) {
                         }
                         value={form.name}
                         onChange={handleChange}
-                        placeholder="Jane Doe"
+                        placeholder="Aarav Sharma"
                         className={getInputClasses(Boolean(fieldErrors.name))}
                       />
                       {fieldErrors.name && (
@@ -415,7 +454,7 @@ export default function AuthCard({ mode }) {
 
                   <div>
                     <label htmlFor="email" className={LABEL_CLASSES}>
-                      Email address
+                      {t("emailAddress")}
                     </label>
                     <input
                       id="email"
@@ -429,7 +468,7 @@ export default function AuthCard({ mode }) {
                       }
                       value={form.email}
                       onChange={handleChange}
-                      placeholder="you@example.com"
+                      placeholder="aarav.sharma@example.in"
                       className={getInputClasses(Boolean(fieldErrors.email))}
                     />
                     {fieldErrors.email && (
@@ -442,9 +481,9 @@ export default function AuthCard({ mode }) {
                   {isRegister && (
                     <div>
                       <label htmlFor="phone" className={LABEL_CLASSES}>
-                        Phone number{" "}
+                        {t("phoneNumber")}{" "}
                         <span className="font-mono text-[10px] font-normal normal-case tracking-[0.08em] text-[#63675D]">
-                          (optional)
+                          ({t("indianPhoneHint")} · {t("optional")})
                         </span>
                       </label>
                       <input
@@ -458,7 +497,7 @@ export default function AuthCard({ mode }) {
                         }
                         value={form.phone}
                         onChange={handleChange}
-                        placeholder="+1 555-0100"
+                        placeholder="+91 98765 43210"
                         className={getInputClasses(Boolean(fieldErrors.phone))}
                       />
                       {fieldErrors.phone && (
@@ -471,7 +510,7 @@ export default function AuthCard({ mode }) {
 
                   <div>
                     <label htmlFor="password" className={LABEL_CLASSES}>
-                      Password
+                      {t("password")}
                     </label>
                     <div className="relative">
                       <input
@@ -490,8 +529,8 @@ export default function AuthCard({ mode }) {
                         onChange={handleChange}
                         placeholder={
                           isRegister
-                            ? "At least 8 characters"
-                            : "Enter your password"
+                            ? t("passwordPlaceholderRegister")
+                            : t("passwordPlaceholderLogin")
                         }
                         className={getInputClasses(
                           Boolean(fieldErrors.password),
@@ -502,7 +541,7 @@ export default function AuthCard({ mode }) {
                         type="button"
                         onClick={() => setShowPassword((prev) => !prev)}
                         aria-label={
-                          showPassword ? "Hide password" : "Show password"
+                          showPassword ? t("hidePassword") : t("showPassword")
                         }
                         aria-pressed={showPassword}
                         className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-[#63675D] transition-colors hover:text-[#233B32] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#6B8F65]"
@@ -532,11 +571,11 @@ export default function AuthCard({ mode }) {
                     <span>
                       {submitting
                         ? isRegister
-                          ? "Creating account..."
-                          : "Signing in..."
+                          ? t("creatingAccount")
+                          : t("signingIn")
                         : isRegister
-                          ? "Create account"
-                          : "Sign in"}
+                          ? t("createAccount")
+                          : t("signIn")}
                     </span>
                     {!submitting && (
                       <ArrowRight
@@ -550,22 +589,22 @@ export default function AuthCard({ mode }) {
                   <div className="border-t border-[#DEDCCF] pt-5 text-center text-sm text-[#63675D]">
                     {isRegister ? (
                       <>
-                        Already have an account?{" "}
+                        {t("alreadyHaveAccount")}{" "}
                         <Link
                           href="/login"
                           className="font-medium text-[#233B32] underline decoration-[#DEDCCF] underline-offset-4 transition-colors hover:text-[#864832] hover:decoration-[#864832] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6B8F65]"
                         >
-                          Sign in
+                          {t("signIn")}
                         </Link>
                       </>
                     ) : (
                       <>
-                        Need a citizen account?{" "}
+                        {t("needCitizenAccount")}{" "}
                         <Link
                           href="/register"
                           className="font-medium text-[#233B32] underline decoration-[#DEDCCF] underline-offset-4 transition-colors hover:text-[#864832] hover:decoration-[#864832] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6B8F65]"
                         >
-                          Register
+                          {t("register")}
                         </Link>
                       </>
                     )}

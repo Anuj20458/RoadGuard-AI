@@ -1,4 +1,12 @@
 import mongoose from "mongoose";
+import {
+  AUTHORITY_CATEGORY_VALUES,
+  DEFAULT_COUNTRY,
+  INDIAN_PIN_ERROR_MESSAGE,
+  isValidIndianPinCode,
+  REPORT_CATEGORY_VALUES,
+  ROAD_TYPE_VALUES,
+} from "../lib/india-data.js";
 
 export const COMPLAINT_STATUSES = [
   "pending",
@@ -32,6 +40,45 @@ const locationSchema = new mongoose.Schema(
       trim: true,
       maxlength: [300, "Address cannot exceed 300 characters."],
       default: "",
+    },
+    country: {
+      type: String,
+      trim: true,
+      maxlength: [80, "Country cannot exceed 80 characters."],
+      default: DEFAULT_COUNTRY,
+    },
+    state: {
+      type: String,
+      trim: true,
+      maxlength: [100, "State / UT cannot exceed 100 characters."],
+      default: "",
+    },
+    district: {
+      type: String,
+      trim: true,
+      maxlength: [100, "District cannot exceed 100 characters."],
+      default: "",
+    },
+    city: {
+      type: String,
+      trim: true,
+      maxlength: [100, "City / town cannot exceed 100 characters."],
+      default: "",
+    },
+    ward: {
+      type: String,
+      trim: true,
+      maxlength: [120, "Ward / locality cannot exceed 120 characters."],
+      default: "",
+    },
+    pinCode: {
+      type: String,
+      trim: true,
+      default: "",
+      validate: {
+        validator: (value) => !value || isValidIndianPinCode(value),
+        message: INDIAN_PIN_ERROR_MESSAGE,
+      },
     },
   },
   { _id: false }
@@ -81,6 +128,30 @@ const complaintSchema = new mongoose.Schema(
       },
       default: "medium",
       required: true,
+    },
+    reportCategory: {
+      type: String,
+      enum: {
+        values: REPORT_CATEGORY_VALUES,
+        message: "Invalid report category.",
+      },
+      default: "pothole",
+    },
+    roadType: {
+      type: String,
+      enum: {
+        values: ["", ...ROAD_TYPE_VALUES],
+        message: "Invalid road type.",
+      },
+      default: "",
+    },
+    authorityCategory: {
+      type: String,
+      enum: {
+        values: ["", ...AUTHORITY_CATEGORY_VALUES],
+        message: "Invalid road authority category.",
+      },
+      default: "",
     },
     status: {
       type: String,
